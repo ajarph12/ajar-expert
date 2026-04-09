@@ -1,10 +1,16 @@
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import Script from "next/script";
 import ChatWidget from "@/components/ChatWidget";
 
-function getLandingPageParts() {
-  const filePath = join(process.cwd(), "landing-page-original.html");
+function getLandingPageParts(lang: string) {
+  const fileName = lang === "en" ? "landing-page-en.html" : "landing-page-id.html";
+  let filePath = join(process.cwd(), fileName);
+  
+  if (!existsSync(filePath)) {
+    filePath = join(process.cwd(), "landing-page-original.html");
+  }
+
   const html = readFileSync(filePath, "utf-8").replace(/\r\n/g, "\n");
 
   const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/);
@@ -19,8 +25,14 @@ function getLandingPageParts() {
   return { styleContent, bodyContent, scriptContent };
 }
 
-export default function HomePage() {
-  const { styleContent, bodyContent, scriptContent } = getLandingPageParts();
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const lang = typeof resolvedSearchParams.lang === "string" ? resolvedSearchParams.lang : "id";
+  const { styleContent, bodyContent, scriptContent } = getLandingPageParts(lang);
 
   return (
     <>

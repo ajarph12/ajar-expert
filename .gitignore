@@ -4,3 +4,9 @@ node_modules
 .env*.local
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code assistant metadata
+.claude/
+
+# Generated output files
+output/

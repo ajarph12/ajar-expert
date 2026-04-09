@@ -1,24 +1,18 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import Script from "next/script";
+import ChatWidget from "@/components/ChatWidget";
 
-/**
- * Read the original landing page HTML once at build time.
- * Extract <style>, <body> content, and <script> separately.
- */
 function getLandingPageParts() {
   const filePath = join(process.cwd(), "landing-page-original.html");
-  const html = readFileSync(filePath, "utf-8");
+  const html = readFileSync(filePath, "utf-8").replace(/\r\n/g, "\n");
 
-  // Extract <style>...</style>
   const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/);
   const styleContent = styleMatch ? styleMatch[1] : "";
 
-  // Extract content between <body> and </body>
   const bodyMatch = html.match(/<body>([\s\S]*?)<script>/);
   const bodyContent = bodyMatch ? bodyMatch[1] : "";
 
-  // Extract <script>...</script>
   const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
   const scriptContent = scriptMatch ? scriptMatch[1] : "";
 
@@ -32,8 +26,10 @@ export default function HomePage() {
     <>
       <style dangerouslySetInnerHTML={{ __html: styleContent }} />
       <div dangerouslySetInnerHTML={{ __html: bodyContent }} />
-      <WhatsAppButton />
-      <script dangerouslySetInnerHTML={{ __html: scriptContent }} />
+      <ChatWidget />
+      <Script id="landing-page-scripts" strategy="afterInteractive">
+        {scriptContent}
+      </Script>
     </>
   );
 }
